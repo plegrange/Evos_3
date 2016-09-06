@@ -23,16 +23,20 @@ public class Main {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        populateLists();
+        geneticAlgorithm = new GeneticAlgorithm(training, testing, min, max);
+        geneticAlgorithm.run(min,max);
     }
 
-    List<Chromosome> completeSet = new ArrayList<>();
+    GeneticAlgorithm geneticAlgorithm;
+    List<double[]> completeSet, training, testing;
 
     String inputFile = "SalData.xls";
     double[] min, max;
     int numberOfAttributes = 8;
 
     private void read() throws IOException {
-
+        completeSet = new ArrayList<>();
         min = new double[numberOfAttributes];
         max = new double[numberOfAttributes];
         for (int i = 0; i < numberOfAttributes; i++) {
@@ -58,25 +62,21 @@ public class Main {
                     if (newVector[x] > max[x])
                         max[x] = newVector[x];
                 }
-                completeSet.add(new Chromosome(newVector));
+                completeSet.add(newVector);
             }
         } catch (BiffException e) {
             e.printStackTrace();
         }
-        normalizeAll();
     }
 
-    private void normalizeAll() {
-        for (Chromosome chromosome : completeSet) {
-            double[] newVector = chromosome.attributes;
-            for (int i = 0; i < numberOfAttributes; i++) {
-                newVector[i] = getNormalizedValue(newVector[i], min[i], max[i]);
-            }
-            chromosome.attributes = newVector;
+    private void populateLists() {
+        training = new ArrayList<>();
+        for (int i = 0; i < 1900; i++) {
+            training.add(completeSet.get(i));
         }
-    }
-
-    private double getNormalizedValue(double value, double min, double max) {
-        return (value - min) / (max - min);
+        testing = new ArrayList<>();
+        for (int i = 1900; i < 2000; i++) {
+            testing.add(completeSet.get(i));
+        }
     }
 }
