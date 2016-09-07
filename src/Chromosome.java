@@ -32,9 +32,9 @@ public class Chromosome {
         double sum = 0;
         int i;
         for (i = 0; i < attributes.length - 1; i++) {
-            sum += Math.pow(attributes[i], powers[i]) * weights[i];
+            sum += Math.pow(attributes[i],powers[i]) * weights[i];
         }
-        return sum + weights[i];
+        return sum + weights[7];
     }
 
     public void test(double[] attributes, double[] min, double[] max) {
@@ -60,13 +60,13 @@ public class Chromosome {
 
     private double getRandomWeight() {
         Random random = new Random();
-        double min = -100, max = 100;
+        double min = -1000, max = 1000;
         return min + (max - min) * random.nextDouble();
     }
 
     private double getRandomPower() {
         Random random = new Random();
-        double min = 0, max = 1;
+        double min = 0, max = 3;
         return min + (max - min) * random.nextDouble();
     }
 
@@ -85,21 +85,36 @@ public class Chromosome {
     }
 
     private double mutateValue(double value) {
-        double mutationConstant = 0.01;
+        double mutationConstant = 200;
         double min = value - mutationConstant, max = value + mutationConstant;
         Random random = new Random();
         return min + (max - min) * random.nextDouble();
     }
 
     private double mutatePowerValue(double value) {
-        double mutationConstant = 0.001;
-        double min = value, max = value + mutationConstant;
+        double mutationConstant = 1;
+        double min = value - mutationConstant, max = value + mutationConstant;
         Random random = new Random();
         return min + (max - min) * random.nextDouble();
     }
 
     public void displayFitness(int size) {
-        System.out.println(fitness / size);
+        System.out.println(Math.sqrt(fitness) / size);
+    }
+
+    public double getFitness(int size) {
+        return Math.sqrt(fitness) / size;
+    }
+
+    public void displayWeights() {
+        for (int i = 0; i < 8; i++) {
+            System.out.print(weights[i] + " ");
+        }
+        System.out.println();
+        for (int i = 0; i < 8; i++) {
+            System.out.print(powers[i] + " ");
+        }
+        System.out.println();
     }
 
 }

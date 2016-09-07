@@ -1,5 +1,15 @@
+import jxl.Workbook;
+import jxl.WorkbookSettings;
+import jxl.write.Number;
+import jxl.write.WritableSheet;
+import jxl.write.WritableWorkbook;
+import jxl.write.WriteException;
+
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Random;
 
 /**
@@ -7,7 +17,7 @@ import java.util.Random;
  */
 public class GeneticAlgorithm {
     int P = 100;
-    int alpha = P / 5;
+    int alpha = 45;
     List<double[]> training, testing;
     List<Chromosome> chromosomes;
 
@@ -38,7 +48,10 @@ public class GeneticAlgorithm {
     public void run(double[] min, double[] max) {
         initializePopulation(min, max);
         displayFitness(chromosomes, training.size());
-        for (int i = 0; i < 5000; i++) {
+        int numberOfIterations = 1000;
+        int[] iterations = new int[numberOfIterations];
+        double[] SSEs = new double[numberOfIterations];
+        for (int i = 0; i < numberOfIterations; i++) {
             List<Chromosome> crossoverList = crossoverSelection(chromosomes);
             crossoverList = testList(crossoverList, min, max);
             //chromosomes = merge(chromosomes, crossoverList);
@@ -46,20 +59,23 @@ public class GeneticAlgorithm {
             mutationList = testList(mutationList, min, max);
             chromosomes = merge(chromosomes, mutationList);
             chromosomes = selectNewPopulation(chromosomes);
+            System.out.println(" - Best: " + chromosomes.get(0).getFitness(training.size()));
             System.out.println(i);
-            System.out.println("Average: " + getAverageFitness() + "  |  Best: " + chromosomes.get(0).fitness);
+            iterations[i] = i;
+            SSEs[i] = chromosomes.get(0).fitness;
         }
-        chromosomes = sortList(chromosomes);
+        try {
+            write(iterations,SSEs);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (WriteException e) {
+            e.printStackTrace();
+        }
+        System.out.println(" - Best: " + chromosomes.get(0).getFitness(training.size()));
+        chromosomes.get(0).displayWeights();
+        //chromosomes = sortList(chromosomes);
         displayFitness(chromosomes, training.size());
         test(min, max);
-    }
-
-    private double getAverageFitness() {
-        double sum = 0;
-        for (Chromosome chromosome : chromosomes) {
-            sum += chromosome.fitness;
-        }
-        return sum / chromosomes.size();
     }
 
     private void test(double[] min, double[] max) {
@@ -81,16 +97,16 @@ public class GeneticAlgorithm {
 
     private List<Chromosome> crossoverSelection(List<Chromosome> list) {
         List<Chromosome> newList = new ArrayList<>();
-        Random random = new Random();
+        //Random random = new Random();
         while (newList.size() < P) {
             Chromosome A = selectRandom(list);
             Chromosome B = selectRandom(list);
             //if (random.nextDouble() > crossoverRate)
             Chromosome child = crossover(A, B);
             testFitness(training, child);
-            if (child.fitness > A.fitness || child.fitness > B.fitness) {
-                newList.add(child);
-            }
+            //if (child.fitness > A.fitness || child.fitness > B.fitness) {
+            newList.add(child);
+            //}
         }
         return newList;
     }
@@ -169,8 +185,10 @@ public class GeneticAlgorithm {
         for (int i = 0; i < alpha; i++) {
             newPopulation.add(chromosomes.remove(0));
         }
+        Random random = new Random();
         for (int i = 0; i < P - alpha; i++) {
-            Chromosome selected = selectRandom(chromosomes);
+            Chromosome selected;
+            selected = chromosomes.get(random.nextInt(chromosomes.size() - 10));
             chromosomes.remove(selected);
             newPopulation.add(selected);
         }
@@ -207,5 +225,30 @@ public class GeneticAlgorithm {
         for (Chromosome chromosome : list) {
             chromosome.displayFitness(size);
         }
+    }
+
+    private String outputFile = "model3.xls";
+
+    private void write(int[] iterations, double[] SSE) throws IOException, WriteException {
+        File file = new File(outputFile);
+        WorkbookSettings wbSettings = new WorkbookSettings();
+
+        wbSettings.setLocale(new Locale("en", "EN"));
+
+        WritableWorkbook workbook = Workbook.createWorkbook(file, wbSettings);
+        workbook.createSheet("Report", 0);
+        WritableSheet excelSheet = workbook.getSheet(0);
+
+        Number learningRate, sse;
+
+        for (int i = 0; i < iterations.length; i++) {
+            learningRate = new Number(0, i, iterations[i]);
+            sse = new Number(1, i, SSE[i]);
+            excelSheet.addCell(learningRate);
+            excelSheet.addCell(sse);
+        }
+
+        workbook.write();
+        workbook.close();
     }
 }

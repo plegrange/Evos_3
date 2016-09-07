@@ -25,7 +25,7 @@ public class Main {
         }
         populateLists();
         geneticAlgorithm = new GeneticAlgorithm(training, testing, min, max);
-        geneticAlgorithm.run(min,max);
+        geneticAlgorithm.run(min, max);
     }
 
     GeneticAlgorithm geneticAlgorithm;
@@ -79,4 +79,6 @@ public class Main {
             testing.add(completeSet.get(i));
         }
     }
+
+
 }
