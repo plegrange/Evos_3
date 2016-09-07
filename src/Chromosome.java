@@ -32,7 +32,7 @@ public class Chromosome {
         double sum = 0;
         int i;
         for (i = 0; i < attributes.length - 1; i++) {
-            sum += Math.pow(attributes[i],powers[i]) * weights[i];
+            sum += Math.pow(attributes[i], powers[i]) * weights[i];
         }
         return sum + weights[7];
     }

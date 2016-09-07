@@ -65,7 +65,7 @@ public class GeneticAlgorithm {
             SSEs[i] = chromosomes.get(0).fitness;
         }
         try {
-            write(iterations,SSEs);
+            write(iterations, SSEs);
         } catch (IOException e) {
             e.printStackTrace();
         } catch (WriteException e) {
@@ -212,6 +212,14 @@ public class GeneticAlgorithm {
         return list;
     }
 
+    public void evaluate(List<double[]> patterns) {
+        System.out.println("Evaluation: ");
+        Chromosome best = chromosomes.get(0);
+        for (double[] pattern : patterns) {
+            System.out.println(best.getValue(pattern));
+        }
+    }
+
     private void testFitness(List<double[]> patterns, Chromosome chromosome) {
         double fitness = 0;
         for (double[] pattern : patterns) {
@@ -227,7 +235,7 @@ public class GeneticAlgorithm {
         }
     }
 
-    private String outputFile = "model3.xls";
+    private String outputFile = "model1.xls";
 
     private void write(int[] iterations, double[] SSE) throws IOException, WriteException {
         File file = new File(outputFile);

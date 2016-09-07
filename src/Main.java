@@ -26,14 +26,47 @@ public class Main {
         populateLists();
         geneticAlgorithm = new GeneticAlgorithm(training, testing, min, max);
         geneticAlgorithm.run(min, max);
+        try {
+            evaluate();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     GeneticAlgorithm geneticAlgorithm;
     List<double[]> completeSet, training, testing;
 
     String inputFile = "SalData.xls";
+    String evalFile = "Evaluation.xls";
     double[] min, max;
     int numberOfAttributes = 8;
+
+    private void evaluate() throws IOException {
+        List<double[]> patterns = new ArrayList<>();
+        File inputWorkbook = new File(evalFile);
+        Workbook workbook;
+        try {
+            workbook = Workbook.getWorkbook(inputWorkbook);
+            Sheet sheet = workbook.getSheet(0);
+            double[] newVector;
+            for (int y = 1; y < 11; y++) {
+                newVector = new double[7];
+
+                for (int x = 0; x < 7; x++) {
+                    Cell cell = sheet.getCell(x, y);
+                    newVector[x] = Integer.parseInt(cell.getContents());
+                    if (newVector[x] < min[x])
+                        min[x] = newVector[x];
+                    if (newVector[x] > max[x])
+                        max[x] = newVector[x];
+                }
+                patterns.add(newVector);
+            }
+        } catch (BiffException e) {
+            e.printStackTrace();
+        }
+        geneticAlgorithm.evaluate(patterns);
+    }
 
     private void read() throws IOException {
         completeSet = new ArrayList<>();
