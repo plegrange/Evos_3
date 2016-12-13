@@ -12,7 +12,10 @@ import java.util.List;
  * Created by s213391244 on 2016/08/31.
  */
 public class Main {
-
+    private List<Item> allItems;
+    private GeneticAlgorithm geneticAlgorithm;
+    private DifferentialEvolution differentialEvolution;
+    private PSO pso;
     public static void main(String[] args) {
         new Main();
     }
@@ -23,95 +26,62 @@ public class Main {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        populateLists();
-        geneticAlgorithm = new GeneticAlgorithm(training, testing, min, max);
-        geneticAlgorithm.run(min, max);
-        try {
-            evaluate();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+
+        geneticAlgorithm = new GeneticAlgorithm();
+        geneticAlgorithm.run(allItems, 1000000);
+/*
+        differentialEvolution = new DifferentialEvolution();
+        differentialEvolution.run(allItems, 2000000);
+        /*
+        pso = new PSO();
+        pso.run(allItems, 100000);
+    */
     }
 
-    GeneticAlgorithm geneticAlgorithm;
-    List<double[]> completeSet, training, testing;
 
-    String inputFile = "SalData.xls";
-    String evalFile = "Evaluation.xls";
-    double[] min, max;
-    int numberOfAttributes = 8;
+    //private List<Component> allComponents;
 
-    private void evaluate() throws IOException {
-        List<double[]> patterns = new ArrayList<>();
-        File inputWorkbook = new File(evalFile);
-        Workbook workbook;
-        try {
-            workbook = Workbook.getWorkbook(inputWorkbook);
-            Sheet sheet = workbook.getSheet(0);
-            double[] newVector;
-            for (int y = 1; y < 11; y++) {
-                newVector = new double[7];
-
-                for (int x = 0; x < 7; x++) {
-                    Cell cell = sheet.getCell(x, y);
-                    newVector[x] = Integer.parseInt(cell.getContents());
-                    if (newVector[x] < min[x])
-                        min[x] = newVector[x];
-                    if (newVector[x] > max[x])
-                        max[x] = newVector[x];
-                }
-                patterns.add(newVector);
-            }
-        } catch (BiffException e) {
-            e.printStackTrace();
-        }
-        geneticAlgorithm.evaluate(patterns);
-    }
+    String inputFile = "DietProblem.xls";
+    //String evalFile = "Evaluation.xls";
 
     private void read() throws IOException {
-        completeSet = new ArrayList<>();
-        min = new double[numberOfAttributes];
-        max = new double[numberOfAttributes];
-        for (int i = 0; i < numberOfAttributes; i++) {
-            min[i] = 99999;
-            max[i] = -99999;
-        }
-        completeSet = new ArrayList<>();
+
+        allItems = new ArrayList<>();
         File inputWorkbook = new File(inputFile);
         Workbook workbook;
 
         try {
             workbook = Workbook.getWorkbook(inputWorkbook);
-            Sheet sheet = workbook.getSheet(0);
-            double[] newVector;
-            for (int y = 1; y < 2001; y++) {
-                newVector = new double[numberOfAttributes];
-
-                for (int x = 0; x < numberOfAttributes; x++) {
-                    Cell cell = sheet.getCell(x, y);
-                    newVector[x] = Integer.parseInt(cell.getContents());
-                    if (newVector[x] < min[x])
-                        min[x] = newVector[x];
-                    if (newVector[x] > max[x])
-                        max[x] = newVector[x];
+            Sheet sheet1 = workbook.getSheet(0);
+            //Sheet sheet2 = workbook.getSheet(1);
+            for (int row = 1; row < 78; row++) {
+                Cell itemNameCell = sheet1.getCell(0, row);
+                List<Component> itemComponents = new ArrayList<>();
+                for (int col = 1; col < 11; col++) {
+                    Cell componentNameCell = sheet1.getCell(col, 0);
+                    Cell componentAmountCell = sheet1.getCell(col, row);
+                    Cell recommendedAnuallyCell = sheet1.getCell(2, col + 78);
+                    Cell unitCell = sheet1.getCell(3, col + 78);
+                    String name = componentNameCell.getContents();
+                    String units = unitCell.getContents();
+                    String amount = componentAmountCell.getContents();
+                    String annual = recommendedAnuallyCell.getContents();
+                    try {
+                        Component newComponent = new Component(name, amount, annual, units);
+                        itemComponents.add(newComponent);
+                    } catch (NumberFormatException e) {
+                        System.out.print("");
+                    }
                 }
-                completeSet.add(newVector);
+                Item newItem = new Item(itemNameCell.getContents(), itemComponents);
+                allItems.add(newItem);
             }
-        } catch (BiffException e) {
+
+        } catch (
+                BiffException e)
+
+        {
             e.printStackTrace();
         }
     }
-
-    private void populateLists() {
-        training = new ArrayList<>();
-        for (int i = 0; i < 1900; i++) {
-            training.add(completeSet.get(i));
-        }
-        testing = new ArrayList<>();
-        for (int i = 1900; i < 2000; i++) {
-            testing.add(completeSet.get(i));
-        }
-    }
-
-
 }
